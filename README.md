@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/700250316.svg)](https://zenodo.org/badge/latestdoi/700250316)
+
 ## Individual level analysis of digital proximity tracing for COVID-19 in Belgium highlights major bottlenecks
 The results of the paper can be reproduced with the code in this repository.
 
