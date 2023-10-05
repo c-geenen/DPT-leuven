@@ -3,7 +3,6 @@ library(fitdistrplus)
 library(gridExtra)
 #library(metR)
 library(ggtext)
-library(readxl)
 library(ggrepel)
 
 set.seed(1) 
@@ -202,7 +201,9 @@ ggplot(result_b, aes(app_uptake,AEN_trigger_prob)) +
   metR::geom_text_contour(aes(z = p), rotate=F, binwidth=0.1, skip=0, stroke=0.2, nudge_x=-0.03, nudge_y=0.01, colour="black") +
   theme_bw() +
   theme(
-    legend.title = element_text(size = 11, hjust = 0.5)
+    legend.title = element_text(size = 9),
+    axis.title = element_text(size=9),
+    legend.position = "right"
   ) +
   coord_fixed(ylim=c(0,1)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -214,9 +215,8 @@ ggplot(result_b, aes(app_uptake,AEN_trigger_prob)) +
   ) +
   #geom_point(size=5, colour="white", shape=15, data=filter(other_studies,use_label), aes(x=`App uptake`, y=`Infected app users consenting to contact tracing`)) +
   geom_point(size=3, data=other_studies, aes(x=`App uptake`, y=`Infected app users consenting to contact tracing`,colour=`DPT system`, shape=`DPT system`)) + 
-  geom_text_repel(point.padding=2, size=2.5, data=other_studies, aes(x=`App uptake`, y=`Infected app users consenting to contact tracing`,label=`Authors`, colour=`DPT system`), show.legend=F) +
+  geom_text_repel(point.padding=2, size=3, data=other_studies, aes(x=`App uptake`, y=`Infected app users consenting to contact tracing`,label=`Authors`, colour=`DPT system`), show.legend=F) +
   #geom_label_repel(point.padding=5, size=3, data=filter(other_studies,use_label), aes(x=`App uptake`, y=`Infected app users consenting to contact tracing`,label=`Authors`, colour=`DPT system`), show.legend=F) +
   scale_shape_manual(values=c(15,16,17,18))
   
-
 ggsave("output/cascade_completion_by_app_uptake_and_trigger_rate.pdf",width=7, height=4.8)

@@ -1,4 +1,5 @@
 library(tidyverse)
+library(readxl)
 library(lubridate)
 library(patchwork)
 
@@ -20,7 +21,7 @@ binom_CI <- function(x, n, p, l) {
 #######################
 
 # Read data file, exclude conflicting info
-observations <- read_csv("Input/tests.csv") %>%
+observations <- read_excel("Input/Supplementary Data.xlsx", sheet="tests", na="NA", guess_max=10^5) %>%
   # Exclusions
   filter(
     !is.na(has_coronalert),
@@ -40,7 +41,7 @@ observations <- read_csv("Input/tests.csv") %>%
       "coronalert" ~ "Digitally traced",
     ),
     indication = fct_relevel(indication, c("Symptomatic screening","Manually traced","Digitally traced")),
-    timepoint=week # can be changed to "week"
+    timepoint=as_date(week) # can be changed to "week"
   ) %>%
   filter(!is.na(indication))
 
@@ -153,9 +154,9 @@ plot_aen_rate
 # Incidence
 ####################
 
-cases <- read_csv("input/extended_cases.csv") %>%
+cases <- read_excel("Input/Supplementary Data.xlsx", sheet="extended_cases", na="NA", guess_max=10^5) %>%
   mutate(
-    timepoint=week, # can be changed to "week"
+    timepoint=as_date(week), # can be changed to "week"
   )
 
 local <- cases %>%
@@ -283,7 +284,7 @@ plot_total_contacts <- ggplot(cases_summary, aes(timepoint,n_contacts_total)) +
 plot_total_contacts
 
 # tracing delay per case
-plot_tracing_delay <- ggplot(cases, aes(timepoint,sample_to_tracing)) +
+plot_tracing_delay <- ggplot(filter(cases,!is.na(sample_to_tracing)), aes(timepoint,sample_to_tracing)) +
   geom_jitter(width=2, height=0.4, size=0.1, alpha=0.4, colour="darkgrey") +
   #geom_smooth(method="loess",span=loess_span,colour="red",fill="red",alpha=0.4) +
   #geom_point(data=cases_summary,aes(x=timepoint,y=sample_to_tracing_median),colour="black") +
@@ -326,9 +327,9 @@ plot_proportion_traced
 # Proportion of exposures to multiple cases (not used)
 ########################
 
-all_contacts <- read_csv("input/extended_contacts.csv") %>%
+all_contacts <- read_excel("Input/Supplementary Data.xlsx", sheet="extended_contacts", na="NA", guess_max=10^5) %>%
   mutate(
-    timepoint=week # can be changed to "week"
+    timepoint=as_date(week) # can be changed to "week"
   )
 
 proportion_multi <- all_contacts %>%

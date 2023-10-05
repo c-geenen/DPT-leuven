@@ -1,4 +1,5 @@
 library(tidyverse)
+library(readxl)
 library(epitools)
 library(lubridate)
 library(patchwork)
@@ -30,7 +31,7 @@ risk_ratio_CI <- function(pos_test, neg_test, pos_control, neg_control, l) {
 ### Load input files and check basic stats #####
 #########################
 
-observations <- read_csv("Input/tests.csv") %>%
+observations <- read_excel("Input/Supplementary Data.xlsx", sheet="tests", na="NA", guess_max=10^5) %>%
   mutate(
     app_status = if_else(
       has_coronalert,
@@ -107,6 +108,10 @@ observations %>% group_by(indication,outcome) %>%
 #######################
 
 delay <- observations %>%
+  filter(
+    indication == "Symptoms",
+    outcome == "pos"
+  ) %>%
   reframe(
     ci = c("mid","low","high"),
     n=n(),

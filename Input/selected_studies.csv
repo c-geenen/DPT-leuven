@@ -1,0 +1,13 @@
+﻿Authors,DPT system,App uptake,Infected app users consenting to contact tracing
+Menges et al - (Zurich),SwissCovid,0.283,0.46
+Menges et al - (Switzerland),SwissCovid,0.283,0.492
+Ballouz et al,SwissCovid,0.62,0.88
+Aronoff-Spencer et al,Other,0.29,0.15
+Wymant et al,NHS COVID-19 app,0.28,0.72
+Kendall et al - (lower est.),NHS COVID-19 app,0.23,0.4
+Kendall et al - (upper est.),NHS COVID-19 app,0.3,0.55
+Vogt et al,Other,0.22,0.67
+Masel et al,Other,0.46,0.25
+Rodriguez et al,Other,0.33,0.64
+Coronalert counter,Coronalert,0.36,
+"Geenen, Raymenants et al",Coronalert,0.455,0.49

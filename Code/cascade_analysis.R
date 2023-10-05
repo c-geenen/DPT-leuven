@@ -1,11 +1,13 @@
 library(tidyverse)
+library(readxl)
 library(lubridate)
 library(investr)
 library(DescTools)
 library(MASS)
 
 # Read data
-cases <- read_csv("Input/cases.csv")
+cases <- read_excel("Input/Supplementary Data.xlsx", sheet="cases", na="NA", guess_max=10^5)
+cases_age <- read_excel("Input/Supplementary Data.xlsx", sheet="cases_age", na="NA", guess_max=10^5)
 
 # Initialise results tibble
 cascade <- tibble(
@@ -31,23 +33,15 @@ cascade <- tibble(
 # Describe included cases
 ############
 
-paste0("n cases: ", nrow(cases))
-cases_not_excl <- cases %>% ### Exclude interpretation neg
-  filter(
-    is.na(Exclusion_criteria),
-  )
-paste0("n included cases: ", nrow(cases_not_excl))
+paste0("n included cases: ", nrow(cases))
 
 # Demographics
-table(cases_not_excl$Sex, useNA="always")
-table(cases_not_excl$Age, useNA="always")
-cases_not_excl %>%
+table(cases$Sex, useNA="always")
+print(cases_age, width=Inf)
+cases %>%
   summarise(
-    #mean_age=mean(Age, na.rm=T),
-    #sd_age=sd(Age, na.rm=T),
     prop_female = sum(Sex=="Vrouw", na.rm=T)/sum(!is.na(Sex), na.rm=T),
-    missing_sex = sum(is.na(Sex))/n(),
-    missing_age = sum(is.na(Age))/n()
+    missing_sex = sum(is.na(Sex))/n()
   )
 
 ################
@@ -55,7 +49,7 @@ cases_not_excl %>%
 ################
 
 # PCR sample to result
-delays <- cases_not_excl %>%
+delays <- cases %>%
   #filter(!is.na(PCR_sample_time),!is.na(PCR_result_time)) %>%
   reframe(
     ci = c("mid","low","high"),
@@ -73,7 +67,7 @@ print(delays, width=Inf)
 
 # for a fair comparison with DPT, where we assume a lognormal distribution:
 # fit time from PCR result to interview to lognormal distribution
-result_to_interview <- cases_not_excl %>%
+result_to_interview <- cases %>%
   filter(
     !is.na(result_to_interview_time),
     result_to_interview_time > 0
@@ -99,28 +93,29 @@ mean_ci
 # Step 1: case is active user
 #######################
 
-## Show number of cases who are active users (by sex, with age)
-cases_not_excl %>%
+## Show number of cases who are active users (by sex)
+cases %>%
   group_by(Active_user) %>%
   summarise(
-    #mean_age=mean(Age, na.rm=T),
     n= n(),
     n_female=sum(Sex=="Vrouw", na.rm=T),
     n_male=sum(Sex=="Man", na.rm=T),
     prop_female=n_female/(n_male+n_female),
-    n_na_sex=sum(is.na(Sex)),
-    n_na_age=sum(is.na(Age))
+    n_na_sex=sum(is.na(Sex))
   )
 
+## Show number of cases who are active users (with age)
+print(cases_age, width=Inf)
+
 # app use when data is missing
-cases_not_excl %>% filter(is.na(Age)) %>% summarise(app_use=sum(Active_user, na.rm=T)/sum(!is.na(Active_user)))
-cases_not_excl %>% filter(is.na(Sex)) %>% summarise(app_use=sum(Active_user, na.rm=T)/sum(!is.na(Active_user)))
+cases %>% filter(Missing_age) %>% summarise(app_use=sum(Active_user, na.rm=T)/sum(!is.na(Active_user)))
+cases %>% filter(is.na(Sex)) %>% summarise(app_use=sum(Active_user, na.rm=T)/sum(!is.na(Active_user)))
 
 # Add totals to summary
 cascade <- cascade %>% add_row(
   step = "Case app use",
-  successes = sum(cases_not_excl$Active_user, na.rm=T), # n active users
-  total = sum(!is.na(cases_not_excl$Active_user)   # total included cases
+  successes = sum(cases$Active_user, na.rm=T), # n active users
+  total = sum(!is.na(cases$Active_user)   # total included cases
 ))
 
 ########################
@@ -128,7 +123,7 @@ cascade <- cascade %>% add_row(
 ########################
 
 # Filter only cases who are app users and were interviewed
-cases_users_traced <- cases_not_excl %>%
+cases_users_traced <- cases %>%
   ### exclude non-active-users
   filter(Active_user==TRUE) %>%
   ### Exclude cases not interviewed
@@ -142,7 +137,7 @@ cases_users_traced <- cases_not_excl %>%
   filter( !is.na(Confirmed_linked) )
 paste0( "cases surveyed on identifier upload status: ", nrow(cases_users_traced) )
 
-## Show number of interviewed app users who uploaded their identifier (by sex, with age)
+## Show number of interviewed app users who uploaded their identifier (by sex)
 cases_users_traced %>%
   group_by(Confirmed_linked) %>%
   summarise(
@@ -151,7 +146,7 @@ cases_users_traced %>%
     n_female=sum(Sex=="Vrouw", na.rm=T),
     n_male=sum(Sex=="Man", na.rm=T),
     n_na_sex=sum(is.na(Sex)),
-    n_na_age=sum(is.na(Age))
+    #n_na_age=sum(is.na(Age))
   )
 
 # Confidence interval for traced users who have uploaded the identifier (at any time after the PCR result)
@@ -277,7 +272,7 @@ cascade <- cascade %>% add_row(
 # the tests of these contacts at our test centre, within 14 days before or after case PCR sampling.
 # (this dataframe also includes an observation for each case-contact pair where the contact did
 # not book a test at our test centre.)
-case_contact_test_trios <- read_csv("Input/case_contact_test_trios.csv") %>%
+case_contact_test_trios <- read_excel("Input/Supplementary Data.xlsx", sheet="case_contact_test_trios", na="NA", guess_max=10^5) %>%
   
   ### Only include relevant preregistration forms
   ### Remove lines from the filter function to determine numbers of excluded pairs

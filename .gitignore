@@ -4,6 +4,6 @@
 .Ruserdata
 *.Rproj
 
-Input/*
+Input/Supplementary_Data.xlsx
 
 .DS_Store
